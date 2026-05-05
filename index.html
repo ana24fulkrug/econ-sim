@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<!--
+  index.html — STRUCTURE LAYER
+  Edit this file to change what's on the page:
+  - Add/remove sections
+  - Change text content
+  - Add new form fields
+  This file does NOT control how it looks (that's styles.css)
+  or how it behaves (that's app.js).
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ↓ Change this to your game's name -->
+  <title>EconWorld — Build Your Empire</title>
+
+  <!-- Google Fonts — change font names here if you want different typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+
+  <!-- Visual layer -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       NAVIGATION
+       To add a new nav link: copy one <li> and change the text/href
+  ============================================================ -->
+  <nav>
+    <a href="/" class="nav-logo">EconWorld</a>  <!-- ← Change game name here -->
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#register">Play Free</a></li>
+      <li><a href="/login">Login</a></li>   <!-- ← This route comes from Python -->
+    </ul>
+  </nav>
+
+
+  <!-- ============================================================
+       HERO — Main headline section
+       Edit the h1, p, and btn text to change messaging
+  ============================================================ -->
+  <section class="hero">
+    <div class="container">
+
+      <div class="hero-tag animate">Player-Driven Economy</div>
+
+      <h1 class="animate delay-1">
+        Build Companies.<br/>
+        <span>Shape the Economy.</span>
+      </h1>
+
+      <p class="animate delay-2">
+        Create businesses, hire workers, trade on the market,
+        and compete with real players in a living economy.
+      </p>
+
+      <!-- Live stats from backend — numbers are filled in by app.js -->
+      <div class="stats-bar animate delay-3">
+        <div class="stat-item">
+          <span class="stat-number" id="stat-players">—</span>
+          <span class="stat-label">Players</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" id="stat-companies">—</span>
+          <span class="stat-label">Companies</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" id="stat-wealth">—</span>
+          <span class="stat-label">Total Wealth</span>
+        </div>
+      </div>
+
+      <div class="btn-group animate delay-4">
+        <a href="#register" class="btn btn-primary">Start Playing →</a>
+        <a href="#features" class="btn btn-secondary">See Features</a>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       FEATURES — Cards explaining what the game offers
+       To add a feature: copy one .feature-card block and edit it
+  ============================================================ -->
+  <section class="features" id="features">
+    <div class="container">
+
+      <div class="section-header">
+        <h2>Everything a real economy has</h2>
+        <p>Every system connects — your decisions ripple through the whole game world.</p>
+      </div>
+
+      <div class="features-grid">
+
+        <div class="feature-card">
+          <span class="feature-icon">🏭</span>
+          <h3>Found Companies</h3>
+          <p>Start production businesses, retail stores, or banks. Hire other players as workers and set their wages.</p>
+        </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">💼</span>
+          <h3>Work Jobs</h3>
+          <p>Get hired at player-owned companies. Earn wages, gain experience, and save up to start your own business.</p>
+        </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">📈</span>
+          <h3>Trade & Invest</h3>
+          <p>Buy and sell goods, resources, and shares on the live marketplace. Watch prices move with supply and demand.</p>
+        </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">🏦</span>
+          <h3>Banking</h3>
+          <p>Deposit money to earn interest, or take loans to fund your next big venture. Player-run banks set their own rates.</p>
+        </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">🗺️</span>
+          <h3>World Map</h3>
+          <p>Claim locations on the map for your stores and apartments. Location affects your customer reach and rent income.</p>
+        </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">🤝</span>
+          <h3>Player-Driven</h3>
+          <p>No NPCs running the economy. Every price, wage, and business decision comes from real players like you.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       REGISTER — Signup form
+       To add a new field: add a .form-group block and update app.js
+  ============================================================ -->
+  <section class="register-section" id="register">
+    <div class="container">
+
+      <div class="register-box">
+        <h2>Join for Free</h2>
+        <p>Your $1,000 starting balance is waiting.</p>
+
+        <!-- id="register-form" is what app.js listens to -->
+        <form id="register-form" novalidate>
+
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              placeholder="e.g. TycoonKing99"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="At least 6 characters"
+            />
+          </div>
+
+          <!-- Success/error message shown here by app.js -->
+          <div id="form-message" class="form-message"></div>
+
+          <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; margin-top:1rem;">
+            Create Account →
+          </button>
+
+        </form>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       FOOTER — Edit links and text here
+  ============================================================ -->
+  <footer>
+    <p>© 2025 EconWorld · <a href="/terms" style="color:inherit">Terms</a> · <a href="/help" style="color:inherit">Help</a></p>
+  </footer>
+
+
+  <!-- Logic layer — loaded last so HTML is ready when JS runs -->
+  <script src="app.js"></script>
+
+</body>
+</html>
