@@ -103,7 +103,7 @@ async function handleRegister(event) {
 
     if (response.ok) {
       showMessage("Account created! Welcome to the economy.", "success");
-      window.location.href = "/dashboard";
+      window.location.href = `/dashboard.html?user=${username}`;
     } else {
       showMessage(data.error ?? "Something went wrong.", "error");
     }
