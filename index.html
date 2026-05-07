@@ -182,6 +182,33 @@
           </button>
 
         </form>
+                  <!-- Success/error message shown here by app.js -->
+          <div id="form-message" class="form-message"></div>
+
+          <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; margin-top:1rem;">
+            Create Account →
+          </button>
+
+        </form>
+
+        <!-- LOGIN FORM — paste starts here -->
+        <div style="margin-top:2rem; padding-top:1.5rem; border-top:1px solid var(--color-border);">
+          <p style="font-size:0.85rem; color:var(--color-muted); margin-bottom:1rem;">Already have an account?</p>
+          <form id="login-form" novalidate>
+            <div class="form-group">
+              <label for="login-username">Username</label>
+              <input type="text" id="login-username" placeholder="Your username" autocomplete="off" />
+            </div>
+            <div class="form-group">
+              <label for="login-password">Password</label>
+              <input type="password" id="login-password" placeholder="Your password" />
+            </div>
+            <div id="login-message" class="form-message"></div>
+            <button type="submit" class="btn btn-secondary" style="width:100%; justify-content:center; margin-top:1rem;">
+              Log In →
+            </button>
+          </form>
+        </div>
       </div>
 
     </div>
