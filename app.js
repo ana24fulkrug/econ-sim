@@ -103,8 +103,7 @@ async function handleRegister(event) {
 
     if (response.ok) {
       showMessage("Account created! Welcome to the economy.", "success");
-      // TODO: redirect to game dashboard once it exists
-      // window.location.href = "/dashboard";
+      window.location.href = "/dashboard";
     } else {
       showMessage(data.error ?? "Something went wrong.", "error");
     }
