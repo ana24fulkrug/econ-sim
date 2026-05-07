@@ -113,7 +113,37 @@ async function handleRegister(event) {
   }
 }
 
+async function handleLogin(event) {
+  event.preventDefault();
 
+  const username = document.getElementById("login-username").value.trim();
+  const password = document.getElementById("login-password").value;
+
+  if (!username || !password) {
+    showLoginMsg("Please enter your username and password.", "error");
+    return;
+  }
+
+  const response = await fetch(CONFIG.apiBase + "/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  });
+
+  const data = await response.json();
+
+  if (response.ok) {
+    window.location.href = `/dashboard.html?user=${username}`;
+  } else {
+    showLoginMsg(data.error ?? "Something went wrong.", "error");
+  }
+}
+
+function showLoginMsg(text, type) {
+  const el = document.getElementById("login-message");
+  el.textContent = text;
+  el.className = "form-message " + type;
+}
 // ============================================================
 // INIT — Runs when the page loads
 // Add any new startup tasks here
@@ -123,4 +153,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const form = document.getElementById("register-form");
   if (form) form.addEventListener("submit", handleRegister);
+  const loginForm = document.getElementById("login-form");
+  if (loginForm) loginForm.addEventListener("submit", handleLogin);
 });
