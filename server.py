@@ -101,6 +101,23 @@ def register():
         # Username already taken (UNIQUE constraint failed)
         return jsonify({"error": "That username is already taken."}), 409
 
+@app.route("/login", methods=["POST"])
+def login():
+    data = request.get_json()
+    username = (data.get("username") or "").strip()
+    password = (data.get("password") or "")
+
+    with get_db() as conn:
+        user = conn.execute(
+            "SELECT * FROM users WHERE username = ? AND password = ?",
+            (username, hash_password(password))
+        ).fetchone()
+
+    if user:
+        return jsonify({"message": "ok", "username": username}), 200
+    else:
+        return jsonify({"error": "Wrong username or password."}), 401
+
 
 @app.route("/stats", methods=["GET"])
 def stats():
