@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<!--
+  dashboard.html — PLAYER HOME PAGE
+  Shown after a user logs in.
+  The username is passed from server.py via the URL: /dashboard?user=TycoonKing99
+  To add new panels: copy a .panel block in the HTML section and update as needed.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EconWorld — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anybody:wght@400;600;700;900&family=Epilogue:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       DESIGN TOKENS — edit here to restyle everything
+    ============================================================ */
+    :root {
+      --bg:          #07080f;
+      --surface:     #0d0f1a;
+      --surface-2:   #12152b;
+      --border:      #1c2040;
+      --border-lit:  #2a3060;
+      --accent:      #4fffb0;
+      --accent-dim:  rgba(79,255,176,0.12);
+      --accent-glow: rgba(79,255,176,0.25);
+      --warn:        #ffb830;
+      --danger:      #ff4f6d;
+      --blue:        #4f8fff;
+      --purple:      #9b4fff;
+      --text:        #d8dff5;
+      --muted:       #4a5278;
+      --font-d:      'Anybody', sans-serif;
+      --font-b:      'Epilogue', sans-serif;
+      --font-m:      'JetBrains Mono', monospace;
+      --r:           8px;
+      --r-lg:        16px;
+      --ease:        0.2s ease;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-b);
+      font-size: 15px;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      grid-template-columns: 220px 1fr;
+      grid-template-areas:
+        "topbar topbar"
+        "sidebar main";
+    }
+
+    /* Scanline overlay */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.06) 2px,
+        rgba(0,0,0,0.06) 4px
+      );
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ============================================================
+       TOP BAR
+    ============================================================ */
+    .topbar {
+      grid-area: topbar;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+      height: 56px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0;
+      z-index: 100;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .logo {
+      font-family: var(--font-d);
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: var(--accent);
+      text-decoration: none;
+      letter-spacing: -0.5px;
+    }
+
+    .world-time {
+      font-family: var(--font-m);
+      font-size: 0.72rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .world-time::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: blink 1.5s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .balance-pill {
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-glow);
+      border-radius: 999px;
+      padding: 0.3rem 1rem;
+      font-family: var(--font-m);
+      font-size: 0.85rem;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .balance-pill::before { content: '$'; opacity: 0.6; }
+
+    .avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-d);
+      font-weight: 900;
+      font-size: 0.85rem;
+      color: #fff;
+      cursor: pointer;
+      border: 2px solid var(--border-lit);
+      transition: border-color var(--ease);
+    }
+
+    .avatar:hover { border-color: var(--accent); }
+
+    /* ============================================================
+       SIDEBAR
+    ============================================================ */
+    .sidebar {
+      grid-area: sidebar;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 1.5rem 0;
+      position: sticky;
+      top: 56px;
+      height: calc(100vh - 56px);
+      overflow-y: auto;
+      z-index: 10;
+    }
+
+    .nav-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .nav-label {
+      font-family: var(--font-m);
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      padding: 0 1.25rem;
+      margin-bottom: 0.4rem;
+    }
+
+    /* Each nav item — to add a new page link, copy one .nav-item block */
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 1.25rem;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all var(--ease);
+      border-left: 2px solid transparent;
+      cursor: pointer;
+    }
+
+    .nav-item:hover {
+      color: var(--text);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .nav-item.active {
+      color: var(--accent);
+      border-left-color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+    .nav-badge {
+      margin-left: auto;
+      background: var(--danger);
+      color: #fff;
+      font-family: var(--font-m);
+      font-size: 0.65rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 999px;
+    }
+
+    /* ============================================================
+       MAIN CONTENT
+    ============================================================ */
+    main {
+      grid-area: main;
+      padding: 2rem;
+      position: relative;
+      z-index: 1;
+      overflow-y: auto;
+    }
+
+    /* Welcome header */
+    .welcome-header {
+      margin-bottom: 2rem;
+      animation: fadeUp 0.5s ease forwards;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .welcome-tag {
+      font-family: var(--font-m);
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 0.4rem;
+    }
+
+    .welcome-header h1 {
+      font-family: var(--font-d);
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+
+    .welcome-header h1 span {
+      color: var(--accent);
+    }
+
+    .welcome-sub {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+
+    /* ---- STAT ROW ---- */
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+      animation: fadeUp 0.5s 0.1s ease both;
+    }
+
+    @media (max-width: 900px) {
+      .stat-row { grid-template-columns: repeat(2, 1fr); }
+      body { grid-template-columns: 1fr; grid-template-areas: "topbar" "main"; }
+      .sidebar { display: none; }
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 1.25rem 1.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color var(--ease), transform var(--ease);
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-lit);
+      transform: translateY(-2px);
+    }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+    }
+
+    .stat-card.green::after  { background: var(--accent); }
+    .stat-card.yellow::after { background: var(--warn); }
+    .stat-card.blue::after   { background: var(--blue); }
+    .stat-card.purple::after { background: var(--purple); }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+      font-family: var(--font-d);
+      font-size: 1.8rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .stat-card.green  .stat-value { color: var(--accent); }
+    .stat-card.yellow .stat-value { color: var(--warn); }
+    .stat-card.blue   .stat-value { color: var(--blue); }
+    .stat-card.purple .stat-value { color: var(--purple); }
+
+    .stat-change {
+      font-size: 0.75rem;
+      margin-top: 0.3rem;
+      color: var(--muted);
+    }
+
+    .stat-change.up   { color: var(--accent); }
+    .stat-change.down { color: var(--danger); }
+
+    /* ---- PANELS GRID ---- */
+    .panels {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.25rem;
+      animation: fadeUp 0.5s 0.2s ease both;
+    }
+
+    @media (max-width: 900px) {
+      .panels { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-head h2 {
+      font-family: var(--font-d);
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .panel-action {
+      font-family: var(--font-m);
+      font-size: 0.72rem;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      transition: opacity var(--ease);
+    }
+
+    .panel-action:hover { opacity: 0.7; }
+
+    /* ---- QUICK ACTIONS ---- */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+      padding: 1.25rem;
+    }
+
+    /* To add a new action button: copy one .action-btn block */
+    .action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 1rem 1.1rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      cursor: pointer;
+      transition: all var(--ease);
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .action-btn:hover {
+      border-color: var(--border-lit);
+      background: rgba(255,255,255,0.04);
+      transform: translateY(-1px);
+    }
+
+    .action-btn.highlight {
+      border-color: rgba(79,255,176,0.3);
+      background: var(--accent-dim);
+    }
+
+    .action-btn.highlight:hover {
+      border-color: rgba(79,255,176,0.6);
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .action-icon { font-size: 1.4rem; }
+
+    .action-label {
+      font-family: var(--font-d);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .action-desc {
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* ---- ACTIVITY FEED ---- */
+    .activity-list {
+      padding: 0.5rem 0;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      transition: background var(--ease);
+    }
+
+    .activity-item:last-child { border-bottom: none; }
+    .activity-item:hover { background: rgba(255,255,255,0.02); }
+
+    .activity-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .dot-green  { background: var(--accent); }
+    .dot-yellow { background: var(--warn); }
+    .dot-blue   { background: var(--blue); }
+    .dot-red    { background: var(--danger); }
+
+    .activity-text {
+      font-size: 0.85rem;
+      line-height: 1.4;
+      flex: 1;
+    }
+
+    .activity-text strong { color: var(--text); font-weight: 600; }
+    .activity-text span   { color: var(--muted); }
+
+    .activity-time {
+      font-family: var(--font-m);
+      font-size: 0.68rem;
+      color: var(--muted);
+      white-space: nowrap;
+      margin-top: 2px;
+    }
+
+    /* ---- RIGHT COLUMN ---- */
+    .right-col {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ---- MARKET SNAPSHOT ---- */
+    .market-list {
+      padding: 0.5rem 0;
+    }
+
+    .market-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.65rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      transition: background var(--ease);
+    }
+
+    .market-row:last-child { border-bottom: none; }
+    .market-row:hover { background: rgba(255,255,255,0.02); }
+
+    .market-name {
+      font-family: var(--font-m);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .market-price {
+      font-family: var(--font-m);
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+
+    .market-change {
+      font-family: var(--font-m);
+      font-size: 0.75rem;
+      min-width: 55px;
+      text-align: right;
+    }
+
+    .market-change.up   { color: var(--accent); }
+    .market-change.down { color: var(--danger); }
+
+    /* ---- JOBS PANEL ---- */
+    .job-item {
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      transition: background var(--ease);
+      cursor: pointer;
+    }
+
+    .job-item:last-child { border-bottom: none; }
+    .job-item:hover { background: rgba(255,255,255,0.02); }
+
+    .job-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+    }
+
+    .job-meta {
+      display: flex;
+      gap: 0.75rem;
+      font-family: var(--font-m);
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .job-wage { color: var(--accent); }
+
+    /* ---- EMPTY STATE (shown when no data yet) ---- */
+    .empty-state {
+      padding: 2.5rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .empty-state .empty-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       TOP BAR
+  ============================================================ -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="/index.html" class="logo">◈ EconWorld</a>
+      <div class="world-time" id="world-time">Day 1, 09:00</div>
+    </div>
+    <div class="topbar-right">
+      <div class="balance-pill" id="balance-display">1,000.00</div>
+      <div class="avatar" id="avatar-initials" title="Your profile">?</div>
+    </div>
+  </header>
+
+
+  <!-- ============================================================
+       SIDEBAR — add new nav links here
+  ============================================================ -->
+  <aside class="sidebar">
+    <nav>
+      <div class="nav-section">
+        <div class="nav-label">Overview</div>
+        <a class="nav-item active" href="#">
+          <span class="nav-icon">⌂</span> Dashboard
+        </a>
+        <a class="nav-item" href="#">
+          <span class="nav-icon">◎</span> Portfolio
+        </a>
+        <a class="nav-item" href="#">
+          <span class="nav-icon">↺</span> Transactions
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-label">Economy</div>
+        <a class="nav-item" href="#">
+          <span class="nav-icon">🏭</span> Companies
+        </a>
+        <a class="nav-item" href="#">
+          <span class="nav-icon">💼</span> Jobs
+          <span class="nav-badge">3</span>
+        </a>
+        <a class="nav-item" href="#">
+          <span class="nav-icon">📈</span> Market
+        </a>
+        <a class="nav-item" href="#">
+          <span class="nav-icon">🏦</span> Bank
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-label">World</div>
+        <a class="nav-item" href="#">
+          <span class="nav-icon">🗺️</span> Map
+        </a>
+        <a class="nav-item" href="#">
+          <span class="nav-icon">⚖️</span> Politics
+        </a>
+        <a class="nav-item" href="#">
+          <span class="nav-icon">◈</span> Settings
+        </a>
+      </div>
+    </nav>
+  </aside>
+
+
+  <!-- ============================================================
+       MAIN CONTENT
+  ============================================================ -->
+  <main>
+
+    <!-- Welcome header — username injected by JS from URL -->
+    <div class="welcome-header">
+      <div class="welcome-tag">Player Dashboard</div>
+      <h1>Welcome back, <span id="username-display">Player</span></h1>
+      <p class="welcome-sub" id="welcome-sub">The economy kept moving while you were away.</p>
+    </div>
+
+    <!-- Stat row — 4 key numbers -->
+    <div class="stat-row">
+      <div class="stat-card green">
+        <div class="stat-label">Balance</div>
+        <div class="stat-value" id="stat-balance">$1,000</div>
+        <div class="stat-change up" id="stat-balance-change">↑ Starting funds</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-label">Net Worth</div>
+        <div class="stat-value">$1,000</div>
+        <div class="stat-change">Assets + Cash</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">Companies</div>
+        <div class="stat-value">0</div>
+        <div class="stat-change">None yet</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-label">Rank</div>
+        <div class="stat-value">#124</div>
+        <div class="stat-change up">↑ New player</div>
+      </div>
+    </div>
+
+    <!-- Main panels -->
+    <div class="panels">
+
+      <!-- LEFT: Quick actions + Activity -->
+      <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+        <!-- Quick actions -->
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Quick Actions</h2>
+          </div>
+          <div class="quick-actions">
+            <!-- To add a new action: copy one .action-btn block -->
+            <a class="action-btn highlight" href="#">
+              <span class="action-icon">🏭</span>
+              <span class="action-label">Found a Company</span>
+              <span class="action-desc">Start your own business and hire workers</span>
+            </a>
+            <a class="action-btn" href="#">
+              <span class="action-icon">💼</span>
+              <span class="action-label">Find a Job</span>
+              <span class="action-desc">Browse open positions and apply</span>
+            </a>
+            <a class="action-btn" href="#">
+              <span class="action-icon">📈</span>
+              <span class="action-label">Trade Market</span>
+              <span class="action-desc">Buy and sell goods and company shares</span>
+            </a>
+            <a class="action-btn" href="#">
+              <span class="action-icon">🏦</span>
+              <span class="action-label">Open Bank Account</span>
+              <span class="action-desc">Deposit funds and earn interest</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Activity feed -->
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Recent Activity</h2>
+            <a class="panel-action" href="#">View all →</a>
+          </div>
+          <div class="activity-list" id="activity-list">
+            <!-- Filled by JS — edit the ACTIVITY_FEED array in app.js to change entries -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT column -->
+      <div class="right-col">
+
+        <!-- Market snapshot -->
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Market Prices</h2>
+            <a class="panel-action" href="#">Open →</a>
+          </div>
+          <div class="market-list" id="market-list">
+            <!-- Filled by JS -->
+          </div>
+        </div>
+
+        <!-- Open jobs -->
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Open Jobs</h2>
+            <a class="panel-action" href="#">Browse all →</a>
+          </div>
+          <div id="jobs-list">
+            <!-- Filled by JS -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+
+  <!-- ============================================================
+       DASHBOARD LOGIC (app.js equivalent for this page)
+       Edit CONFIG and data arrays below to change content.
+  ============================================================ -->
+  <script>
+    // ============================================================
+    // CONFIG
+    // ============================================================
+    const CONFIG = {
+      apiBase: "http://localhost:5000",
+      useMock: true  // ← Set false when real server.py is running
+    };
+
+    // ============================================================
+    // MOCK DATA — replace with real API calls when backend is ready
+    // Edit these arrays to change what appears on the page
+    // ============================================================
+    const ACTIVITY_FEED = [
+      { dot: "dot-green",  text: "Account created — <strong>$1,000</strong> starting balance added",    time: "just now" },
+      { dot: "dot-blue",   text: "World event: <strong>Steel prices</strong> rising due to shortage",   time: "2m ago" },
+      { dot: "dot-yellow", text: "<strong>SteelCorp</strong> posted 3 new job openings",                time: "5m ago" },
+      { dot: "dot-red",    text: "Market alert: <strong>Oil</strong> down 4.2% this hour",              time: "12m ago" },
+      { dot: "dot-green",  text: "<strong>GrainCo</strong> declared a dividend — $2.10 per share",      time: "1h ago" },
+    ];
+
+    const MARKET_PRICES = [
+      { name: "STEEL",  price: 84.20,  change: +1.4  },
+      { name: "GRAIN",  price: 12.50,  change: -0.8  },
+      { name: "WOOD",   price: 31.00,  change: +0.3  },
+      { name: "OIL",    price: 91.30,  change: -4.2  },
+      { name: "CLOTH",  price: 22.40,  change: +0.1  },
+    ];
+
+    const OPEN_JOBS = [
+      { title: "Steel Worker",      company: "SteelCorp",   wage: "$45/hr",  type: "Full-time" },
+      { title: "Wheat Harvester",   company: "GrainCo",     wage: "$28/hr",  type: "Part-time" },
+      { title: "Bank Teller",       company: "First Bank",  wage: "$38/hr",  type: "Full-time" },
+    ];
+
+
+    // ============================================================
+    // USERNAME — reads from URL e.g. /dashboard.html?user=Ana
+    // In production, server.py will inject this directly
+    // ============================================================
+    function getUsername() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("user") || "Player";
+    }
+
+    function getInitials(name) {
+      return name.slice(0, 2).toUpperCase();
+    }
+
+
+    // ============================================================
+    // RENDER FUNCTIONS — one per section
+    // ============================================================
+    function renderWelcome(username) {
+      document.title = `EconWorld — ${username}`;
+      document.getElementById("username-display").textContent = username;
+      document.getElementById("avatar-initials").textContent = getInitials(username);
+
+      const hour = new Date().getHours();
+      const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+      document.getElementById("welcome-sub").textContent =
+        `${greeting}, ${username}. The economy kept moving while you were away.`;
+    }
+
+    function renderActivity() {
+      const list = document.getElementById("activity-list");
+      if (!ACTIVITY_FEED.length) {
+        list.innerHTML = `<div class="empty-state"><div class="empty-icon">◎</div>No activity yet</div>`;
+        return;
+      }
+      list.innerHTML = ACTIVITY_FEED.map(item => `
+        <div class="activity-item">
+          <div class="activity-dot ${item.dot}"></div>
+          <div class="activity-text">${item.text}</div>
+          <div class="activity-time">${item.time}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderMarket() {
+      const list = document.getElementById("market-list");
+      list.innerHTML = MARKET_PRICES.map(item => {
+        const dir = item.change >= 0 ? "up" : "down";
+        const sign = item.change >= 0 ? "▲" : "▼";
+        return `
+          <div class="market-row">
+            <span class="market-name">${item.name}</span>
+            <span class="market-price">$${item.price.toFixed(2)}</span>
+            <span class="market-change ${dir}">${sign} ${Math.abs(item.change)}%</span>
+          </div>`;
+      }).join("");
+    }
+
+    function renderJobs() {
+      const list = document.getElementById("jobs-list");
+      if (!OPEN_JOBS.length) {
+        list.innerHTML = `<div class="empty-state"><div class="empty-icon">💼</div>No open jobs right now</div>`;
+        return;
+      }
+      list.innerHTML = OPEN_JOBS.map(job => `
+        <div class="job-item">
+          <div class="job-title">${job.title}</div>
+          <div class="job-meta">
+            <span>${job.company}</span>
+            <span class="job-wage">${job.wage}</span>
+            <span>${job.type}</span>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderWorldTime() {
+      // Simulated game clock — 1 real second = 1 game minute
+      let gameMinutes = 0;
+      setInterval(() => {
+        gameMinutes++;
+        const day  = Math.floor(gameMinutes / 1440) + 1;
+        const hour = Math.floor((gameMinutes % 1440) / 60).toString().padStart(2, "0");
+        const min  = (gameMinutes % 60).toString().padStart(2, "0");
+        document.getElementById("world-time").textContent = `Day ${day}, ${hour}:${min}`;
+      }, 1000);
+    }
+
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    document.addEventListener("DOMContentLoaded", () => {
+      const username = getUsername();
+      renderWelcome(username);
+      renderActivity();
+      renderMarket();
+      renderJobs();
+      renderWorldTime();
+    });
+  </script>
+
+</body>
+</html>
